@@ -10,6 +10,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    home: '',
+    away: '',
     teams: [] as Team[],
     matches: [] as Match[]
   },
@@ -31,6 +33,12 @@ export default new Vuex.Store({
       if (index >= 0) {
         state.matches[index].updateScore(match.homeScore, match.awayScore)
       }
+    },
+    setHome (state, home) {
+      state.home = home
+    },
+    setAway (state, away) {
+      state.away = away
     }
   },
   actions: {
@@ -45,8 +53,24 @@ export default new Vuex.Store({
     startGame ({ commit }, { match }) {
       try {
         commit('startGame', { match })
+        commit('setHome', '')
+        commit('setAway', '')
       } catch (error) {
         console.log('startGame error %o', error)
+      }
+    },
+    setHome ({ commit }, { home }) {
+      try {
+        commit('setHome', { home })
+      } catch (error) {
+        console.log('nextHome error %o', error)
+      }
+    },
+    setAway ({ commit }, { away }) {
+      try {
+        commit('setAway', { away })
+      } catch (error) {
+        console.log('nextAway error %o', error)
       }
     }
   },

@@ -1,7 +1,59 @@
 <template>
   <div class="hello">
     <h1>LFWCSB</h1>
-    <button @click="startNewGame('Spain', 'Argentina')">Start</button>
+    <div class="score-board">
+      <div class="ongoing">
+        <h2>Ongoing Matches</h2>
+        <div class="new-match-heading">
+          <v-select
+          label="name"
+          @input="nextHome"
+          :options="teams"
+          placeholder="Home"
+          :value="home.name"
+          :clearable="false"
+          class="team-select"
+        ></v-select>
+          <v-select
+          label="name"
+          @input="nextAway"
+          :options="teams"
+          placeholder="Away"
+          :value="away.name"
+          :clearable="false"
+          class="team-select"
+        ></v-select>
+          <button
+            @click="startNewGame(home, away)"
+            :disabled="!home || !away"
+          >Start new Match</button>
+        </div>
+        <ol class="board" style="border: 1px solid dotted">
+          <li
+            v-for="m in ongoingMatches"
+            :key="m.match.started"
+            style="border-bottom: 1px solid grey"
+          >
+            {{ m.match.homeTeam.name
+              + ' vs. ' + m.match.awayTeam.name + ': ' + m.match.homeScore + ' - ' + m.match.awayScore }}
+          </li>
+        </ol>
+
+      </div>
+      <div class="summary">
+        <h2>All Played Matches</h2>
+        <ol class="board" style="border: 1px solid dotted">
+          <li
+            v-for="m in matchesSummary"
+            :key="m.match.started"
+            style="border-bottom: 1px solid grey"
+          >
+            {{ m.match.homeTeam.name
+              + ' vs. ' + m.match.awayTeam.name + ': ' + m.match.homeScore + ' - ' + m.match.awayScore }}
+          </li>
+        </ol>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -10,12 +62,24 @@ import { Component, Vue } from 'vue-property-decorator'
 import Match from '@/classes/Match'
 import Team from '@/classes/Team'
 import { mapActions } from 'vuex'
+import vSelect from 'vue-select'
+import 'vue-select/dist/vue-select.css'
 
 @Component({
   components: {
-
+    vSelect
   },
   computed: {
+    home: {
+      get: function () {
+        return this.$store.state.home
+      }
+    },
+    away: {
+      get: function () {
+        return this.$store.state.away
+      }
+    },
     teams: {
       get: function () {
         return this.$store.state.teams
@@ -36,26 +100,32 @@ import { mapActions } from 'vuex'
     },
     matchesSummary: {
       get: function () {
-        return this.$store.state.matches.sort((a: Match, b: Match) => {
-          const aScore = a.homeScore + a.awayScore
-          const bScore = b.homeScore + b.awayScore
+        return [...this.$store.state.matches].sort((a: Match, b: Match) => {
+          const aScore = Number(a.match.homeScore) + Number(a.match.awayScore)
+          const bScore = Number(b.match.homeScore) + Number(b.match.awayScore)
           return (aScore - bScore !== 0)
             ? aScore - bScore
-            : a.started - b.started
+            : b.match.started - a.match.started
         })
       }
     }
   },
   methods: {
-    ...mapActions(['getTeams', 'startGame']),
+    ...mapActions(['getTeams', 'startGame', 'setHome', 'setAway']),
 
-    startNewGame (home: string, away: string): void {
-      const homeIndex = this.teams.findIndex((t: Team) => t.name === home)
-      console.log('homeTeam index', homeIndex)
-      const awayIndex = this.teams.findIndex((t: Team) => t.name === away)
-      console.log('awayTeam index', awayIndex)
-      console.log('homeTeam isPlaying', !this.teams[homeIndex].isPlaying)
-      console.log('awayTeam isPlaying', !this.teams[awayIndex].isPlaying)
+    nextHome (val) {
+      const home = val.name
+      this.setHome({ home })
+    },
+
+    nextAway (val) {
+      const away = val.name
+      this.setAway({ away })
+    },
+
+    startNewGame (home: Team, away: Team): void {
+      const homeIndex = this.teams.findIndex((t: Team) => t.name === home.home)
+      const awayIndex = this.teams.findIndex((t: Team) => t.name === away.away)
       if (
         homeIndex >= 0 &&
         awayIndex >= 0 &&
@@ -102,5 +172,32 @@ li {
 }
 a {
   color: #42b983;
+}
+.score-board {
+  display: flex;
+  flex-direction: row;
+  .ongoing{
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    .new-match-heading {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      .team-select {
+        width:200px;
+      }
+    }
+  }
+  .summary {
+    width: 50%;
+  }
+  .board {
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
 }
 </style>
