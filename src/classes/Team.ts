@@ -1,5 +1,5 @@
 interface TeamInterface {
-  name: string,
+  name: string
   isPlaying: boolean
 }
 export default class Team implements TeamInterface {
