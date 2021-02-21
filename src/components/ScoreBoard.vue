@@ -43,10 +43,6 @@
             :step="1"
             align="center"
           ></vue-numeric-input>
-          <button
-            @click.stop="updateMatchScore(home)"
-            :disabled="matches.length <= 0"
-          >Update score for selected match</button>
         </div>
         <ol class="board" style="border: 1px solid dotted">
           <li
@@ -54,8 +50,20 @@
             :key="m.match.started"
             style="border-bottom: 1px solid grey"
           >
-            {{ m.match.homeTeam.name
-              + ' vs. ' + m.match.awayTeam.name + ': ' + m.match.homeScore + ' - ' + m.match.awayScore }}
+            <p>
+              <span class="score">
+              {{ m.match.homeTeam.name
+                + ' vs. ' + m.match.awayTeam.name + ': ' + m.match.homeScore + ' - ' + m.match.awayScore }}
+              </span>
+              <span class="actions">
+                <button
+                  @click.stop="updateMatchScore(m.match.started)"
+                >Update Score</button>
+                <button
+                  @click.stop="finishMatch(m.match.started)"
+                >Finish Match</button>
+              </span>
+            </p>
           </li>
         </ol>
 
@@ -68,8 +76,10 @@
             :key="m.match.started"
             style="border-bottom: 1px solid grey"
           >
+          <p>
             {{ m.match.homeTeam.name
               + ' vs. ' + m.match.awayTeam.name + ': ' + m.match.homeScore + ' - ' + m.match.awayScore }}
+          </p>
           </li>
         </ol>
       </div>
@@ -133,7 +143,7 @@ import VueNumericInput from 'vue-numeric-input'
     },
     ongoingMatches: {
       get: function () {
-        return this.$store.state.matches.filter((match: Match) => !match.finished)
+        return this.$store.state.matches.filter((match: Match) => !match.match.finished)
       }
     },
     matchesSummary: {
@@ -149,7 +159,16 @@ import VueNumericInput from 'vue-numeric-input'
     }
   },
   methods: {
-    ...mapActions(['getTeams', 'startGame', 'updateScore', 'setHome', 'setAway', 'setHomeScore', 'setAwayScore']),
+    ...mapActions([
+      'getTeams',
+      'startGame',
+      'updateScore',
+      'setHome',
+      'setAway',
+      'setHomeScore',
+      'setAwayScore',
+      'finishGame'
+    ]),
 
     nextHome (val) {
       const home = val.name
@@ -186,20 +205,13 @@ import VueNumericInput from 'vue-numeric-input'
         this.startGame({ match })
       }
     },
-
-    finishGame (match: Match): void {
-      const _match = this.matches.findIndex((m: Match) => m.started === match.started)
-      if (_match >= 0) {
-        this.matches[_match].homeTeam.isPlaying = false
-        this.matches[_match].awayTeam.isPlaying = false
-        this.matches[_match].finished = true
-      }
+    updateMatchScore (started: number): void {
+      const match = started
+      this.updateScore({ match })
     },
-    updateMatchScore (home: Team): void {
-      const match = this.matches.findIndex((m: Match) => m.match.homeTeam.name === home.home)
-      if (match >= 0) {
-        this.updateScore({ match })
-      }
+    finishMatch (started: number): void {
+      const match = started
+      this.finishGame({ match })
     }
   },
   created () {
@@ -259,6 +271,21 @@ a {
     display: flex;
     flex-direction: column;
     width: 100%;
+    li p {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: left;
+      .score {
+        align-self: flex-start;
+      }
+      .actions {
+        align-self: flex-end;
+        *:last-child {
+          margin-left: 1rem;
+        }
+      }
+    }
   }
 }
 </style>

@@ -29,8 +29,17 @@ export default new Vuex.Store({
       }
     },
     updateScore (state, match) {
-      state.matches[match].match.homeScore = state.homeScore
-      state.matches[match].match.awayScore = state.awayScore
+      console.log('mutation updateScore match', match)
+      const _match = state.matches.find((m: Match) => m.match.started === match)
+      _match.match.homeScore = state.homeScore
+      _match.match.awayScore = state.awayScore
+    },
+    finishGame (state, match) {
+      console.log('mutation updateScore match', match)
+      const _match = state.matches.find((m: Match) => m.match.started === match)
+      _match.match.finished = true
+      _match.match.homeTeam.isPlaying = false
+      _match.match.awayTeam.isPlaying = false
     },
     setHome (state, home) {
       state.home = home
@@ -91,6 +100,9 @@ export default new Vuex.Store({
     },
     updateScore ({ commit }, { match }) {
       commit('updateScore', match)
+    },
+    finishGame ({ commit }, { match }) {
+      commit('finishGame', match)
     }
   },
   modules: {
