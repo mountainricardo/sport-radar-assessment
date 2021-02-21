@@ -29,21 +29,28 @@
           >Start new Match</button>
         </div>
         <div class="new-score-heading">
+          <label for="homescore">
+            Home Team Score:
+            <vue-numeric-input
+              name="homescore"
+              v-model="homeScore"
+              :min="0"
+              :max="20"
+              :step="1"
+              align="center"
+            ></vue-numeric-input>
+          </label>
+          <label for="awayscore">
+            Away Team Score:
           <vue-numeric-input
-            v-model="homeScore"
-            :min="0"
-            :max="20"
-            :step="1"
-            align="center"
-          ></vue-numeric-input>
-          <vue-numeric-input
+            name="awayscore"
             v-model="awayScore"
             :min="0"
             :max="20"
             :step="1"
             align="center"
           ></vue-numeric-input>
-        </div>
+          </label>        </div>
         <ol class="board" style="border: 1px solid dotted">
           <li
             v-for="m in ongoingMatches"
@@ -148,13 +155,15 @@ import VueNumericInput from 'vue-numeric-input'
     },
     matchesSummary: {
       get: function () {
-        return [...this.$store.state.matches].sort((a: Match, b: Match) => {
-          const aScore = Number(a.match.homeScore) + Number(a.match.awayScore)
-          const bScore = Number(b.match.homeScore) + Number(b.match.awayScore)
-          return (aScore - bScore !== 0)
-            ? bScore - aScore
-            : b.match.started - a.match.started
-        })
+        return [...this.$store.state.matches]
+          .filter((m: Match) => m.match.finished)
+          .sort((a: Match, b: Match) => {
+            const aScore = Number(a.match.homeScore) + Number(a.match.awayScore)
+            const bScore = Number(b.match.homeScore) + Number(b.match.awayScore)
+            return (aScore - bScore !== 0)
+              ? bScore - aScore
+              : b.match.started - a.match.started
+          })
       }
     }
   },

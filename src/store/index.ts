@@ -22,20 +22,12 @@ export default new Vuex.Store({
     startGame (state, match) {
       state.matches.push(match)
     },
-    finishGame (state, match) {
-      const index = state.matches.findIndex((m: Match) => m.started === match.started)
-      if (index >= 0) {
-        state.matches[index].finishMatch()
-      }
-    },
     updateScore (state, match) {
-      console.log('mutation updateScore match', match)
       const _match = state.matches.find((m: Match) => m.match.started === match)
       _match.match.homeScore = state.homeScore
       _match.match.awayScore = state.awayScore
     },
     finishGame (state, match) {
-      console.log('mutation updateScore match', match)
       const _match = state.matches.find((m: Match) => m.match.started === match)
       _match.match.finished = true
       _match.match.homeTeam.isPlaying = false
