@@ -6,12 +6,12 @@ import TeamService from '@/services/TeamsService'
 
 Vue.use(Vuex)
 
-// const findByName = (teams: Team[], name: string) => teams.find(team => team.name === name)
-
 export default new Vuex.Store({
   state: {
     home: '',
     away: '',
+    homeScore: 0,
+    awayScore: 0,
     teams: [] as Team[],
     matches: [] as Match[]
   },
@@ -29,16 +29,20 @@ export default new Vuex.Store({
       }
     },
     updateScore (state, match) {
-      const index = state.matches.findIndex((m: Match) => m.started === match.started)
-      if (index >= 0) {
-        state.matches[index].updateScore(match.homeScore, match.awayScore)
-      }
+      state.matches[match].match.homeScore = state.homeScore
+      state.matches[match].match.awayScore = state.awayScore
     },
     setHome (state, home) {
       state.home = home
     },
     setAway (state, away) {
       state.away = away
+    },
+    setHomeScore (state, score) {
+      state.homeScore = score
+    },
+    setAwayScore (state, score) {
+      state.awayScore = score
     }
   },
   actions: {
@@ -53,8 +57,6 @@ export default new Vuex.Store({
     startGame ({ commit }, { match }) {
       try {
         commit('startGame', { match })
-        commit('setHome', '')
-        commit('setAway', '')
       } catch (error) {
         console.log('startGame error %o', error)
       }
@@ -72,6 +74,23 @@ export default new Vuex.Store({
       } catch (error) {
         console.log('nextAway error %o', error)
       }
+    },
+    setHomeScore ({ commit }, { score }) {
+      try {
+        commit('setHomeScore', { score })
+      } catch (error) {
+        console.log('setHomeScore error %o', error)
+      }
+    },
+    setAwayScore ({ commit }, { score }) {
+      try {
+        commit('setAwayScore', { score })
+      } catch (error) {
+        console.log('setAwayScore error %o', error)
+      }
+    },
+    updateScore ({ commit }, { match }) {
+      commit('updateScore', match)
     }
   },
   modules: {

@@ -28,6 +28,26 @@
             :disabled="!home || !away"
           >Start new Match</button>
         </div>
+        <div class="new-score-heading">
+          <vue-numeric-input
+            v-model="homeScore"
+            :min="0"
+            :max="20"
+            :step="1"
+            align="center"
+          ></vue-numeric-input>
+          <vue-numeric-input
+            v-model="awayScore"
+            :min="0"
+            :max="20"
+            :step="1"
+            align="center"
+          ></vue-numeric-input>
+          <button
+            @click.stop="updateMatchScore(home)"
+            :disabled="matches.length <= 0"
+          >Update score for selected match</button>
+        </div>
         <ol class="board" style="border: 1px solid dotted">
           <li
             v-for="m in ongoingMatches"
@@ -64,10 +84,15 @@ import Team from '@/classes/Team'
 import { mapActions } from 'vuex'
 import vSelect from 'vue-select'
 import 'vue-select/dist/vue-select.css'
+import VueNumericInput from 'vue-numeric-input'
 
 @Component({
   components: {
-    vSelect
+    vSelect,
+    VueNumericInput
+  },
+  props: {
+
   },
   computed: {
     home: {
@@ -80,6 +105,22 @@ import 'vue-select/dist/vue-select.css'
         return this.$store.state.away
       }
     },
+    homeScore: {
+      get: function () {
+        return this.$store.state.homeScore
+      },
+      set: function (newValue) {
+        this.$store.commit('setHomeScore', newValue)
+      }
+    },
+    awayScore: {
+      get: function () {
+        return this.$store.state.awayScore
+      },
+      set: function (newValue) {
+        this.$store.commit('setAwayScore', newValue)
+      }
+    },
     teams: {
       get: function () {
         return this.$store.state.teams
@@ -88,9 +129,6 @@ import 'vue-select/dist/vue-select.css'
     matches: {
       get: function () {
         return this.$store.state.matches
-      },
-      set: function (newValue: Match[]) {
-        // this.matches = newValue
       }
     },
     ongoingMatches: {
@@ -104,14 +142,14 @@ import 'vue-select/dist/vue-select.css'
           const aScore = Number(a.match.homeScore) + Number(a.match.awayScore)
           const bScore = Number(b.match.homeScore) + Number(b.match.awayScore)
           return (aScore - bScore !== 0)
-            ? aScore - bScore
+            ? bScore - aScore
             : b.match.started - a.match.started
         })
       }
     }
   },
   methods: {
-    ...mapActions(['getTeams', 'startGame', 'setHome', 'setAway']),
+    ...mapActions(['getTeams', 'startGame', 'updateScore', 'setHome', 'setAway', 'setHomeScore', 'setAwayScore']),
 
     nextHome (val) {
       const home = val.name
@@ -121,6 +159,18 @@ import 'vue-select/dist/vue-select.css'
     nextAway (val) {
       const away = val.name
       this.setAway({ away })
+    },
+
+    setHomeScore (val) {
+      console.log('setHomeScore')
+      const score = val
+      this.setHomeScore({ score })
+    },
+
+    setAwayScore (val) {
+      console.log('setAwayScore')
+      const score = val
+      this.setAwayScore({ score })
     },
 
     startNewGame (home: Team, away: Team): void {
@@ -145,9 +195,11 @@ import 'vue-select/dist/vue-select.css'
         this.matches[_match].finished = true
       }
     },
-    updateScoreBoard (home: number, away: number): void {
-      // matchIndex = this.matches.find
-      // this.matches = matches
+    updateMatchScore (home: Team): void {
+      const match = this.matches.findIndex((m: Match) => m.match.homeTeam.name === home.home)
+      if (match >= 0) {
+        this.updateScore({ match })
+      }
     }
   },
   created () {
@@ -157,7 +209,6 @@ import 'vue-select/dist/vue-select.css'
 export default class ScoreBoard extends Vue {}
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 h3 {
   margin: 40px 0 0;
@@ -181,6 +232,16 @@ a {
     display: flex;
     flex-direction: column;
     .new-match-heading {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      .team-select {
+        width:200px;
+      }
+    }
+    .new-score-heading {
+      margin: 2rem 0;
       width: 100%;
       display: flex;
       flex-direction: row;

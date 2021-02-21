@@ -23,7 +23,6 @@ export default class Match implements MatchInterface {
     // Virtually impossible two matches with same number of started ms
     // so, started attribute will work as unique numeric ID
     this.started = new Date().getTime()
-    console.log('Match constructor started', this.started)
   }
 
   // references a team in teams collection
