@@ -60,7 +60,6 @@ export default new Vuex.Store({
     async getTeams ({ commit }) {
       try {
         const teams = await teamsService.fetch()
-        console.log('fetch teams', teams)
         commit('getTeams', teams)
       } catch (error) {
         console.log('getTeams error %o', error)
@@ -69,7 +68,6 @@ export default new Vuex.Store({
     async getMatches ({ commit }) {
       try {
         const matches = await matchesService.fetch()
-        console.log('fetch matches', matches)
         commit('getMatches', matches)
       } catch (error) {
         console.log('getMatches error %o', error)
