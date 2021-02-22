@@ -15,10 +15,11 @@ import ScoreBoard from '@/components/ScoreBoard.vue'
     ScoreBoard
   },
   methods: {
-    ...mapActions(['getTeams'])
+    ...mapActions(['getTeams', 'getMatches'])
   },
   created () {
     this.getTeams()
+    this.getMatches()
   }
 })
 export default class Home extends Vue {}

@@ -2,9 +2,13 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Team from '@/classes/Team'
 import Match from '@/classes/Match'
-import TeamService from '@/services/TeamsService'
+import TeamsService from '@/services/TeamsService'
+import MatchesService from '@/services/MatchesService'
 
 Vue.use(Vuex)
+
+const teamsService = new TeamsService()
+const matchesService = new MatchesService()
 
 export default new Vuex.Store({
   state: {
@@ -19,19 +23,25 @@ export default new Vuex.Store({
     getTeams (state, teams) {
       state.teams = teams
     },
+    getMatches (state, matches) {
+      state.matches = matches
+    },
     startGame (state, match) {
       state.matches.push(match)
+      matchesService.save([...state.matches])
     },
     updateScore (state, match) {
       const _match = state.matches.find((m: Match) => m.match.started === match)
       _match.match.homeScore = state.homeScore
       _match.match.awayScore = state.awayScore
+      matchesService.save([...state.matches])
     },
     finishGame (state, match) {
       const _match = state.matches.find((m: Match) => m.match.started === match)
       _match.match.finished = true
       _match.match.homeTeam.isPlaying = false
       _match.match.awayTeam.isPlaying = false
+      matchesService.save([...state.matches])
     },
     setHome (state, home) {
       state.home = home
@@ -49,10 +59,20 @@ export default new Vuex.Store({
   actions: {
     async getTeams ({ commit }) {
       try {
-        const teams = await new TeamService().fetch()
+        const teams = await teamsService.fetch()
+        console.log('fetch teams', teams)
         commit('getTeams', teams)
       } catch (error) {
         console.log('getTeams error %o', error)
+      }
+    },
+    async getMatches ({ commit }) {
+      try {
+        const matches = await matchesService.fetch()
+        console.log('fetch matches', matches)
+        commit('getMatches', matches)
+      } catch (error) {
+        console.log('getMatches error %o', error)
       }
     },
     startGame ({ commit }, { match }) {
